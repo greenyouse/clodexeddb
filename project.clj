@@ -4,14 +4,16 @@
   :license {:name "BSD 2-Clause"
             :url "http://www.opensource.org/licenses/BSD-2-Clause"}
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2657"]
-                 [com.ydn/db "1.1.2"]]
+                 [org.clojure/clojurescript "0.0-2816"]
+                 ;[weasel "0.6.0-SNAPSHOT"]
+                 [com.greenyouse/ydn-cljs "1.1.2"]]
 
   :plugins [[lein-cljsbuild "1.0.4"]]
 
   :cljsbuild {:builds [{:id "dev"
                         :source-paths ["src" "dev"]
-                        :compiler {:output-to "clodexeddb.js"
-                                   :optimizations :simple
-                                   :source-map "clodexeddb.js.map"
-                                   :preamble ["db/ydn-db.js"]}}]})
+                        :compiler {:main clodexeddb.core
+                                   :output-to "clodexeddb.js"
+                                   :output-dir "out"
+                                   :optimizations :none
+                                   :source-map true}}]})

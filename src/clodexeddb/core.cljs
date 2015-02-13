@@ -1,25 +1,28 @@
-(ns clodexeddb.core)
+(ns clodexeddb.core
+  (:require ydn.db))
 
 (comment (enable-console-print!))
 
 (defn setup
-  "Defines a new database with a given schema. The schema is standard ydn-db
-  style but with ClojureScript syntax. See here for more information:
-  http://dev.yathit.com/ydn-db/doc/setup/schema.html"
-  [name schema]
-  (let [schema (clj->js schema)]
-    (new js/ydn.db.Storage name schema)))
+  "Defines a new database with a given schema. An optional ydn-db schema
+  may be given, otherwise a default one will be provided. See here for more
+  information: http://dev.yathit.com/ydn-db/doc/setup/schema.html"
+  [name & {:keys [schema]
+           :or {schema
+                {:stores [{:name "database"
+                           :keyPath "name"
+                           :indexes [{:keyPath "value"
+                                      :type "TEXT"}]}]}}}]
+  (let [s (clj->js schema)]
+    (new js/ydn.db.Storage name s)))
 
 ;; TODO: find a better way to deal with db, shouldn't have to pass it around
 ;;   like this
 (comment (def test-db
-            (setup "test" {:stores [{:name "database"
-                                     :keyPath "name"
-                                     :indexes [{:keyPath "value"
-                                                :type "TEXT"}]}]})))
+            (setup "test")))
 
 (defn rm-db
-  "Remove a database"
+  "Removes a database"
   [db-name]
   (js/ydn.db.deleteDatabase db-name))
 
@@ -38,7 +41,7 @@
                                   :value "this is stuff"}))
 
 (defn clear
-  "Removes nd item from and ObjectStore
+  "Removes an item from an ObjectStore
   db -- the database defined with setup
   store -- the name of an ObjectStore
   value -- the value to remove (as a string, primary key of your schema)"
@@ -103,12 +106,12 @@
        (.done (comp callback #(js->clj %))))))
 
 (comment (let [kr (key-range :only "this is stuff")]
-           (value-query test-db "database" "value" kr
-                        (fn [x] (println x))))
+            (value-query test-db "database" "value" kr
+              (fn [x] (println x)))))
 
          ;; won't work on primary keys, try this:
-         (value-query test-db "database" "name" "stuff"
-                      (fn [x] (println x))))
+(comment (value-query test-db "database" "name" "stuff"
+            (fn [x] (println x))))
 
 (defn get-query
   "Retrieves an item from an ObjectStore.
@@ -121,4 +124,4 @@
       (.done (comp callback #(js->clj %)))))
 
 (comment (get-query test-db "database" "stuff"
-                     (fn [x] (println (get x "value")))))
+            (fn [x] (println (get x "value")))))
