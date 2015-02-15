@@ -1,5 +1,16 @@
 (ns clodexeddb.core
-  (:require ydn.db))
+  (:require [ydn.db :as db]
+            [ydn.db.KeyRange :as kr])
+  (:import [ydn.db Storage]))
+
+
+;; ydn.db.Request problem with async callbacks
+;; see /ydn/db/base/request.js
+
+;; get-query and value-query don't work yet. They return a ydn.db.Request which
+;; invokes an async callback. When compiled, the queries can be passed a .done()
+;; or .fail() callback but this doesn't work with gclosure format. Not sure
+;; what to do here.
 
 (comment (enable-console-print!))
 
@@ -13,10 +24,10 @@
                            :indexes [{:keyPath "value"
                                       :type "TEXT"}]}]}
          s (clj->js schema)]
-     (new js/ydn.db.Storage name s)))
+     (Storage. name s)))
   ([name schema]
    (let [s (clj->js schema)]
-     (new js/ydn.db.Storage name s))))
+     (Storage. name s))))
 
 ;; TODO: find a better way to deal with db, shouldn't have to pass it around
 ;;   like this
@@ -26,7 +37,7 @@
 (defn rm-db
   "Removes a database"
   [db-name]
-  (js/ydn.db.deleteDatabase db-name))
+  (db/deleteDatabase db-name))
 
 (comment (rm-db "test"))
 
@@ -40,7 +51,7 @@
     (.add db store obj)))
 
 (comment (add test-db "database" {:name "stuff"
-                                  :value "this is stuff"}))
+                                   :value "this is stuff"}))
 
 (defn clear
   "Removes an item from an ObjectStore
@@ -48,36 +59,35 @@
   store -- the name of an ObjectStore
   value -- the value to remove (as a string, primary key of your schema)"
   [db store name]
-  (.clear db store (js/ydn.db.KeyRange.only name)))
+  (.clear db store (kr/only name)))
 
 ;; see how "stuff" is the primary key for the ObjectStore?
-(comment (clear db "database" "stuff"))
-
+(comment (clear test-db "database" "stuff"))
 
 (defmulti key-range (fn [call & args] call))
 
 ;; All keys ?x or (if true) All keys < x
 (defmethod key-range :upper-bound [call val ceil]
-  (js/ydn.db.KeyRange.upperBound val (or ceil false)))
+  (kr/upperBound val (or ceil false)))
 
 ;; All keys ?x or (if true) All keys > x
 (defmethod key-range :lower-bound [call val floor]
-  (js/ydn.db.KeyRange.lowerBound val (or floor false)))
+  (kr/lowerBound val (or floor false)))
 
 ;; All keys ?x && ?y  -- false, false
 ;; All keys > x && < y -- true, true
 ;; All > x && ?y -- true, false
 ;; All ?x && < y -- false, true
 (defmethod key-range :bound [call val floor ceil]
-  (js/ydn.db.KeyRange.bound val (or floor false) (or ceil false)))
+  (kr/bound val (or floor false) (or ceil false)))
 
 ;; All keys = x, most efficient
 (defmethod key-range :only [call val]
-  (js/ydn.db.KeyRange.only val))
+  (kr/only val))
 
 ;; String or Array keys starting with x
 (defmethod key-range :starts [call val]
-  (js/ydn.db.KeyRange.starts val))
+  (kr/starts val))
 
 
 
@@ -107,13 +117,14 @@
    (-> (.values db store field k-range limit offset)
        (.done (comp callback #(js->clj %))))))
 
-(comment (let [kr (key-range :only "this is stuff")]
-            (value-query test-db "database" "value" kr
-              (fn [x] (println x)))))
+
+(comment (let [k (key-range :only "this is stuff")]
+            (value-query test-db "database" "value" k
+              (fn [x] (println x))))
 
          ;; won't work on primary keys, try this:
-(comment (value-query test-db "database" "name" "stuff"
-            (fn [x] (println x))))
+         (value-query test-db "database" "name" "stuff"
+           (fn [x] (println x))))
 
 (defn get-query
   "Retrieves an item from an ObjectStore.
@@ -126,4 +137,4 @@
       (.done (comp callback #(js->clj %)))))
 
 (comment (get-query test-db "database" "stuff"
-            (fn [x] (println (get x "value")))))
+           (fn [x] (println (get x "value")))))
