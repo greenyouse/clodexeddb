@@ -4,7 +4,7 @@
   :license {:name "BSD 2-Clause"
             :url "http://www.opensource.org/licenses/BSD-2-Clause"}
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2816"]
+                 [org.clojure/clojurescript "0.0-2850"]
                  ;[weasel "0.6.0-SNAPSHOT"]
                  [com.greenyouse/ydn-cljs "1.1.2"]]
 

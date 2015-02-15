@@ -7,14 +7,16 @@
   "Defines a new database with a given schema. An optional ydn-db schema
   may be given, otherwise a default one will be provided. See here for more
   information: http://dev.yathit.com/ydn-db/doc/setup/schema.html"
-  [name & {:keys [schema]
-           :or {schema
-                {:stores [{:name "database"
+  ([name]
+   (let [schema {:stores [{:name "database"
                            :keyPath "name"
                            :indexes [{:keyPath "value"
-                                      :type "TEXT"}]}]}}}]
-  (let [s (clj->js schema)]
-    (new js/ydn.db.Storage name s)))
+                                      :type "TEXT"}]}]}
+         s (clj->js schema)]
+     (new js/ydn.db.Storage name s)))
+  ([name schema]
+   (let [s (clj->js schema)]
+     (new js/ydn.db.Storage name s))))
 
 ;; TODO: find a better way to deal with db, shouldn't have to pass it around
 ;;   like this
