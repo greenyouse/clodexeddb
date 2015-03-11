@@ -1,8 +1,6 @@
 (ns clodexeddb.core
   (:require ydn.db))
 
-(comment (enable-console-print!))
-
 (defn setup
   "Defines a new database with a given schema. An optional ydn-db schema
   may be given, otherwise a default one will be provided. See here for more
@@ -20,8 +18,8 @@
 
 ;; TODO: find a better way to deal with db, shouldn't have to pass it around
 ;;   like this
-(comment (def test-db
-            (setup "test")))
+#_  (def test-db
+      (setup "test"))
 
 (defn rm-db
   "Removes a database"
@@ -39,8 +37,8 @@
   (let [obj (clj->js value)]
     (.add db store obj)))
 
-(comment (add test-db "database" {:name "stuff"
-                                  :value "this is stuff"}))
+#_  (add test-db "database" {:name "stuff"
+                             :value "this is stuff"})
 
 (defn clear
   "Removes an item from an ObjectStore
@@ -51,7 +49,7 @@
   (.clear db store (js/ydn.db.KeyRange.only name)))
 
 ;; see how "stuff" is the primary key for the ObjectStore?
-(comment (clear db "database" "stuff"))
+#_  (clear test-db "database" "stuff")
 
 
 (defmulti key-range (fn [call & args] call))
@@ -107,9 +105,9 @@
    (-> (.values db store field k-range limit offset)
        (.done (comp callback #(js->clj %))))))
 
-(comment (let [kr (key-range :only "this is stuff")]
-            (value-query test-db "database" "value" kr
-              (fn [x] (println x)))))
+#_  (let [kr (key-range :only "this is stuff")]
+      (value-query test-db "database" "value" kr
+        (fn [x] (println x))))
 
          ;; won't work on primary keys, try this:
 (comment (value-query test-db "database" "name" "stuff"
@@ -125,5 +123,5 @@
   (-> (.get db store val)
       (.done (comp callback #(js->clj %)))))
 
-(comment (get-query test-db "database" "stuff"
-            (fn [x] (println (get x "value")))))
+#_  (get-query test-db "database" "stuff"
+      (fn [x] (println (get x "value"))))

@@ -14,7 +14,7 @@ unless there's demand for it. Any pull requests are welcome!
 
 Add this dependency to your project.clj:
 ```clj
-[com.greenyouse/clodexeddb "0.1.0-SNAPSHOT"]
+[com.greenyouse/clodexeddb "0.1.0"]
 ```
 
 ## Usage
