@@ -5,10 +5,10 @@
             :url "http://www.opensource.org/licenses/BSD-2-Clause"}
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [org.clojure/clojurescript "0.0-2850"]
-                 ;[weasel "0.6.0-SNAPSHOT"]
-                 [com.greenyouse/ydn-cljs "1.1.2"]]
+                 [com.greenyouse/ydn-cljs "1.1.2-alpha"]]
 
-  :plugins [[lein-cljsbuild "1.0.4"]]
+  :profiles {:dev {:dependencies  [[weasel "0.6.0"]]
+                   :plugins [[lein-cljsbuild "1.0.4"]]}}
 
   :cljsbuild {:builds [{:id "dev"
                         :source-paths ["src" "dev"]
